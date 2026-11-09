@@ -1,0 +1,23 @@
+---
+title: "A minimal blood-gene panel to flag severe dengue"
+author: "M. I. Izla (2021/ICT/30)"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE,
+                      fig.path = "../figures/", dpi = 200)
+library(GEOquery); library(tidyverse); library(limma)
+library(pheatmap); library(clusterProfiler); library(org.Hs.eg.db)
+library(glmnet); library(caret); library(pROC)
+```
+
+# 1. Data import
+
+```{r import}
+gse   <- getGEO("GSE51808", GSEMatrix = TRUE)[[1]]   # change if you chose another
+expr  <- exprs(gse)
+meta  <- pData(gse)
+fdata <- fData(gse)
+dim(expr)
+```
