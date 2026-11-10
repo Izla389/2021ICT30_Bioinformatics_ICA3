@@ -15,9 +15,78 @@ library(glmnet); library(caret); library(pROC)
 # 1. Data import
 
 ```{r import}
-gse   <- getGEO("GSE51808", GSEMatrix = TRUE)[[1]]   # change if you chose another
+gse   <- getGEO("GSE51808", GSEMatrix = TRUE)[[1]]
 expr  <- exprs(gse)
 meta  <- pData(gse)
 fdata <- fData(gse)
-dim(expr)
+cat("Probes x samples:", dim(expr), "\n")
+```
+
+# 2. Sample groups (acute DF vs DHF only)
+
+```{r group}
+# join all the label columns of each sample into one text string
+cols <- c(intersect(c("title", "source_name_ch1"), colnames(meta)),
+          grep("^characteristics_ch1", colnames(meta), value = TRUE))
+lab <- apply(meta[, cols, drop = FALSE], 1, paste, collapse = " | ")
+
+meta$severity <- case_when(
+  str_detect(lab, regex("DHF|hemorrhagic|haemorrhagic", ignore_case = TRUE)) ~ "DHF",
+  str_detect(lab, regex("\\bDF\\b|dengue fever", ignore_case = TRUE))        ~ "DF",
+  str_detect(lab, regex("healthy|control|normal", ignore_case = TRUE))       ~ "Healthy",
+  TRUE ~ "Other")
+meta$phase <- ifelse(str_detect(lab, regex("conval", ignore_case = TRUE)),
+                     "convalescent", "acute")
+
+print(table(meta$severity, meta$phase))   # expect DF acute 18, DHF acute 10
+
+keep  <- meta$severity %in% c("DF", "DHF") & meta$phase == "acute"
+expr  <- expr[, keep]
+meta  <- meta[keep, ]
+meta$group <- meta$severity
+print(table(meta$group))                  # expect DF 18, DHF 10
+```
+
+# 3. Quality control
+
+```{r qc-before, fig.width=10, fig.height=5}
+if (max(expr, na.rm = TRUE) > 50) expr <- log2(expr + 1)
+cat("Missing values:", sum(is.na(expr)), "\n")
+par(mar = c(6, 4, 3, 1))
+boxplot(as.data.frame(expr), las = 2, cex.axis = 0.5,
+        main = "Before normalisation", ylab = "log2 expression")
+```
+
+```{r qc-after, fig.width=10, fig.height=5}
+expr <- normalizeBetweenArrays(expr, method = "quantile")
+par(mar = c(6, 4, 3, 1))
+boxplot(as.data.frame(expr), las = 2, cex.axis = 0.5,
+        main = "After normalisation", ylab = "log2 expression")
+```
+
+```{r filter}
+v <- apply(expr, 1, var)
+expr_f <- expr[v > median(v), ]
+cat("Probes before:", nrow(expr), " after:", nrow(expr_f), "\n")
+```
+
+# 4. Exploratory analysis
+
+```{r pca}
+pca <- prcomp(t(expr_f), scale. = TRUE)
+pca_df <- data.frame(pca$x[, 1:2], group = meta$group)
+ggplot(pca_df, aes(PC1, PC2, colour = group)) + geom_point(size = 3) +
+  theme_bw() + ggtitle("PCA of blood expression profiles")
+```
+
+```{r heatmap, fig.width=8, fig.height=6}
+top <- names(sort(apply(expr_f, 1, var), decreasing = TRUE))[1:50]
+ann <- data.frame(group = meta$group, row.names = colnames(expr_f))
+pheatmap(expr_f[top, ], annotation_col = ann,
+         show_rownames = FALSE, show_colnames = FALSE)
+```
+
+```{r cluster, fig.width=9, fig.height=5}
+plot(hclust(dist(t(expr_f))), labels = meta$group, cex = 0.6,
+     main = "Sample clustering")
 ```

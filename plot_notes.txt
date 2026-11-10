@@ -1,0 +1,16 @@
+Plot 1 - Boxplot before normalisation:
+The boxes were at similar heights.
+
+Plot 2 - Boxplot after normalisation:
+After normalisation the boxes lined up evenly.
+This means the differences between arrays were removed .
+
+Plot 3 - PCA plot:
+The DF and DHF samples were mixed together.
+One sample looked like an outlier.
+
+Plot 4 - Heatmap:
+Samples of the same group did not cluster together.
+
+Plot 5 - Dendrogram:
+Samples did not group by disease type.
