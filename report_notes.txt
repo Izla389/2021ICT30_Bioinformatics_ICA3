@@ -1,0 +1,36 @@
+RESULTS - Differential expression
+
+After filtering, 27357 probes were tested. No probe remained significant after
+Benjamini-Hochberg correction for multiple testing (smallest adjusted p-value = 0.22).
+Because the standard threshold (adjusted p < 0.05 and |log2FC| > 0.5) yielded fewer
+than 20 probes, an exploratory threshold of nominal p < 0.01 and |log2FC| > 0.5 was
+applied, which identified 241 probes. Of these, 174 had higher expression in DHF and
+67 had lower expression. The probes with the smallest p-values corresponded to EHD3,
+PAK6, CCL25, MOXD1 and SEC24D (Table 1, Figure 2). These results are exploratory
+and should be interpreted with caution.
+
+Figure 2 caption: Volcano plot of differential expression between DHF (n = 10) and
+DF (n = 18) acute-phase samples. Each point is a probe. The x-axis shows the log2
+fold change (DHF minus DF) and the y-axis shows -log10 of the nominal p-value. Red
+points passed the exploratory threshold (nominal p < 0.01, |log2FC| > 0.5).
+
+DISCUSSION NOTE
+With 28 patients and thousands of tests, the study had low statistical power. The
+number of probes with p < 0.01 (241) is close to the number expected by chance
+(about 1% of the probes tested), so the individual genes reported here should be
+regarded as hypotheses, not validated markers.
+
+Table 1. Top probes by p-value (DHF vs DF)
+Gene    | log2FC | P value | Adj. P
+EHD3    | 0.78   | 8.1e-06 | 0.22
+PAK6    | -0.57  | 1.0e-04 | 0.73
+CCL25   | 0.89   | 1.9e-04 | 0.73
+MOXD1   | 1.26   | 2.1e-04 | 0.73
+SEC24D  | 0.88   | 2.3e-04 | 0.73
+MGLL    | 1.12   | 2.6e-04 | 0.73
+PSEN2   | 0.60   | 2.6e-04 | 0.73
+HDGFRP3 | -0.92  | 3.1e-04 | 0.73
+MGAT3   | 0.67   | 3.4e-04 | 0.73
+ 
+ 
+figure 2 :volcano-1

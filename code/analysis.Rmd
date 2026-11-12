@@ -90,3 +90,46 @@ pheatmap(expr_f[top, ], annotation_col = ann,
 plot(hclust(dist(t(expr_f))), labels = meta$group, cex = 0.6,
      main = "Sample clustering")
 ```
+# 5. Differential expression (DHF vs DF)
+
+```{r limma}
+group  <- factor(meta$group, levels = c("DF", "DHF"))
+design <- model.matrix(~ 0 + group)
+colnames(design) <- levels(group)
+
+fit  <- lmFit(expr_f, design)
+fit2 <- eBayes(contrasts.fit(fit, makeContrasts(DHF - DF, levels = design)))
+deg  <- topTable(fit2, number = Inf, adjust.method = "BH")
+
+# gene-symbol column in the annotation table (name differs by platform)
+sym_col <- grep("symbol", colnames(fdata), ignore.case = TRUE, value = TRUE)[1]
+cat("Symbol column used:", sym_col, "\n")
+deg$symbol <- fdata[rownames(deg), sym_col]
+
+# main cut-off: adjusted P < 0.05 and |log2 fold change| > 0.5
+sig <- deg[deg$adj.P.Val < 0.05 & abs(deg$logFC) > 0.5, ]
+cutoff_used <- "adjusted P < 0.05 and |logFC| > 0.5"
+
+# with only 28 samples this can be empty or tiny, so use a fallback
+if (nrow(sig) < 20) {
+  sig <- deg[deg$P.Value < 0.01 & abs(deg$logFC) > 0.5, ]
+  cutoff_used <- "nominal P < 0.01 and |logFC| > 0.5 (fallback)"
+}
+cat("Cut-off used:", cutoff_used, "\n")
+cat("Significant probes:", nrow(sig),
+    "| up in DHF:", sum(sig$logFC > 0),
+    "| down in DHF:", sum(sig$logFC < 0), "\n")
+
+dir.create("../results", showWarnings = FALSE)
+write.csv(deg, "../results/DEG_table.csv")
+head(deg[, c("symbol", "logFC", "P.Value", "adj.P.Val")], 10)
+```
+
+```{r volcano, fig.width=7, fig.height=5}
+deg$status <- ifelse(rownames(deg) %in% rownames(sig), "Significant", "Not significant")
+ggplot(deg, aes(logFC, -log10(P.Value), colour = status)) +
+  geom_point(alpha = 0.5) +
+  scale_colour_manual(values = c("Significant" = "red", "Not significant" = "grey60")) +
+  theme_bw() + labs(title = "Volcano plot: DHF vs DF",
+                    x = "log2 fold change (DHF - DF)", y = "-log10(P value)")
+```
