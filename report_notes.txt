@@ -33,4 +33,36 @@ HDGFRP3 | -0.92  | 3.1e-04 | 0.73
 MGAT3   | 0.67   | 3.4e-04 | 0.73
  
  
-figure 2 :volcano-1
+figure:volcano-1
+
+
+
+RESULTS - Classifier
+
+A LASSO logistic regression classifier was evaluated with 20 repeats of stratified
+5-fold cross-validation on the 28 acute samples (18 DF, 10 DHF), using the 5,000
+most variable probes. Feature selection took place inside each training fold. The
+classifier did not discriminate DHF from DF: the mean area under the ROC curve
+(AUC) was 0.52 (95% interval across repeats 0.39-0.68), which is indistinguishable
+from chance (AUC = 0.5) (Figure 3). When the model was fitted on all samples with
+the conservative regularisation setting (lambda.1se), LASSO retained no probes,
+so no minimal gene panel could be defined.
+
+Figure 3 caption: ROC curve for the LASSO classifier of DHF versus DF from repeat 1
+of the cross-validation. The diagonal line represents random guessing (AUC = 0.5).
+
+DISCUSSION NOTES
+- Hypothesis not supported: AUC above 0.80 with fewer than 10 genes was not reached.
+- Consistent with the differential expression: no probe passed multiple-testing
+  correction (smallest adjusted p = 0.22).
+- Possible reasons: small sample (10 DHF, 18 DF), whole blood mixes many cell types,
+  sampling days 2-9 after onset (the immune response changes quickly), a single
+  hospital and season, and DF and DHF may differ in the clinical course more than
+  in gene expression at presentation.
+- Strength: nested cross-validation with feature selection inside the folds avoids
+  over-optimistic results.
+- Implication: with this dataset, a gene panel cannot yet support early detection
+  of severe dengue; larger multi-site cohorts and samples taken before the
+  critical phase are needed.
+
+

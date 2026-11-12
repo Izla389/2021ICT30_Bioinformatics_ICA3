@@ -1,5 +1,5 @@
 ---
-title: "A minimal blood-gene panel to flag severe dengue"
+title: "Can a minimal whole-blood gene panel distinguish severe from non-severe dengue? A negative result from a public cohort"
 author: "M. I. Izla (2021/ICT/30)"
 output: html_document
 ---
@@ -132,4 +132,52 @@ ggplot(deg, aes(logFC, -log10(P.Value), colour = status)) +
   scale_colour_manual(values = c("Significant" = "red", "Not significant" = "grey60")) +
   theme_bw() + labs(title = "Volcano plot: DHF vs DF",
                     x = "log2 fold change (DHF - DF)", y = "-log10(P value)")
+```
+
+
+# 7. Minimal-panel classifier (LASSO)
+
+```{r classifier}
+set.seed(2026)
+
+# keep the 5000 most variable probes (uses no group information, so no leakage)
+vv   <- apply(expr_f, 1, var)
+keep5000 <- names(sort(vv, decreasing = TRUE))[1:min(5000, length(vv))]
+X <- t(expr_f[keep5000, ])
+y <- factor(meta$group, levels = c("DF", "DHF"))
+
+# 20 repeats of 5-fold cross-validation; LASSO is fitted inside each training set
+res <- map_dfr(1:20, function(r) {
+  folds <- createFolds(y, k = 5)
+  map_dfr(folds, function(idx) {
+    fit <- cv.glmnet(X[-idx, ], y[-idx], family = "binomial", alpha = 1, nfolds = 5)
+    tibble(rep = r, truth = y[idx],
+           prob = as.numeric(predict(fit, X[idx, ], s = "lambda.min", type = "response")))
+  })
+})
+
+aucs <- res %>% group_by(rep) %>%
+  summarise(auc = as.numeric(auc(roc(truth, prob, levels = c("DF", "DHF"),
+                                     direction = "<", quiet = TRUE))))
+cat("Mean AUC:", round(mean(aucs$auc), 3), "\n")
+print(round(quantile(aucs$auc, c(0.025, 0.975)), 3))
+```
+
+```{r roc, fig.width=5, fig.height=5}
+one <- res %>% filter(rep == 1)
+plot(roc(one$truth, one$prob, levels = c("DF", "DHF"), direction = "<", quiet = TRUE),
+     print.auc = TRUE, main = "ROC curve (cross-validation, repeat 1)")
+```
+
+```{r panel}
+final <- cv.glmnet(X, y, family = "binomial", alpha = 1, nfolds = 5)
+co    <- coef(final, s = "lambda.1se")
+panel_probes <- setdiff(rownames(co)[co[, 1] != 0], "(Intercept)")
+cat("Probes in panel:", length(panel_probes), "\n")
+
+panel <- data.frame(probe = panel_probes,
+                    symbol = fdata[panel_probes, sym_col],
+                    coefficient = round(co[panel_probes, 1], 3))
+panel
+write.csv(panel, "../results/panel_genes.csv", row.names = FALSE)
 ```
