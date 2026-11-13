@@ -211,3 +211,5 @@ panel <- data.frame(probe = panel_probes,
 panel
 write.csv(panel, "../results/panel_genes.csv", row.names = FALSE)
 ```
+
+sessionInfo()
