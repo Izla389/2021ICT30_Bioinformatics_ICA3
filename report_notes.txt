@@ -66,3 +66,48 @@ DISCUSSION NOTES
   critical phase are needed.
 
 
+roc-1.png
+
+
+RESULTS - Pathway enrichment
+
+The 241 probes with nominal p < 0.01 and |log2FC| > 0.5 corresponded to 185 unique
+gene symbols. These were tested for Gene Ontology (biological process) enrichment
+using clusterProfiler (Yu et al., 2012) against a background of 13,288 genes
+represented on the array. Five terms were significantly enriched (Benjamini-Hochberg
+adjusted p < 0.05), all related to protein handling in the endoplasmic reticulum
+(ER): ER-associated degradation (ERAD) pathway (8 genes, adjusted p = 0.005),
+protein exit from the ER (6 genes, adjusted p = 0.005), retrograde protein transport
+from ER to cytosol (5 genes, adjusted p = 0.005), ER-to-cytosol transport (5 genes,
+adjusted p = 0.005) and regulation of protein exit from the ER (4 genes, adjusted
+p = 0.042) (Figure 4, Table 2). Because these terms share many of the same genes,
+they represent one biological theme rather than five independent findings.
+
+Figure 4 caption: Gene Ontology biological process enrichment of genes differentially
+expressed (nominal p < 0.01, |log2FC| > 0.5) between DHF and DF. Dot size shows the
+number of genes and colour shows the adjusted p-value.
+
+Table 2. Enriched GO biological process terms
+GO term                                              | Genes in term | Adj. p
+ERAD pathway                                         | 8/134         | 0.005
+Protein exit from endoplasmic reticulum              | 6/134         | 0.005
+Retrograde protein transport, ER to cytosol          | 5/134         | 0.005
+Endoplasmic reticulum to cytosol transport           | 5/134         | 0.005
+Regulation of protein exit from endoplasmic reticulum| 4/134         | 0.042
+
+DISCUSSION NOTES
+- Theme: the ER protein-quality-control system (ERAD, ER exit). Dengue virus makes
+  its proteins and replicates on ER membranes, and ER stress responses are widely
+  reported in dengue, so this theme is biologically plausible. Find one paper that
+  supports this (search Google Scholar: "dengue virus endoplasmic reticulum ERAD")
+  and cite it.
+- Caution: the gene list comes from nominal p-values, and the number of probes
+  (241) is about what chance would give. The enrichment correction accounts for
+  testing many GO terms, but not for the noise in the gene list. So this is a
+  hypothesis for future testing, not a confirmed mechanism.
+- The enrichment shows that the weak signal is not random noise in biology terms,
+  but it was not strong enough to give a working classifier (AUC 0.52).
+
+enrich-1
+
+

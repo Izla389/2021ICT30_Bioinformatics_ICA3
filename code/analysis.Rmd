@@ -134,6 +134,36 @@ ggplot(deg, aes(logFC, -log10(P.Value), colour = status)) +
                     x = "log2 fold change (DHF - DF)", y = "-log10(P value)")
 ```
 
+# 6. Pathway enrichment
+
+```{r enrich, fig.width=9, fig.height=6}
+# clean gene symbols: remove blanks, "---", and split multi-gene entries
+clean <- function(x) {
+  s <- unlist(strsplit(as.character(x), " /// ", fixed = TRUE))
+  s <- trimws(s)
+  unique(s[!is.na(s) & s != "" & s != "---"])
+}
+sig_genes <- clean(sig$symbol)
+universe  <- clean(deg$symbol)
+cat("Significant genes:", length(sig_genes), "| universe:", length(universe), "\n")
+
+ego <- enrichGO(gene = sig_genes, universe = universe,
+                OrgDb = org.Hs.eg.db, keyType = "SYMBOL",
+                ont = "BP", pAdjustMethod = "BH",
+                pvalueCutoff = 0.05, qvalueCutoff = 0.2)
+ego_df <- as.data.frame(ego)
+cat("Enriched GO terms:", nrow(ego_df), "\n")
+
+if (nrow(ego_df) > 0) {
+  print(enrichplot::dotplot(ego, showCategory = 15) +
+          ggtitle("GO biological process enrichment"))
+  write.csv(ego_df, "../results/GO_enrichment.csv", row.names = FALSE)
+  head(ego_df[, c("Description", "GeneRatio", "p.adjust")], 10)
+} else {
+  cat("No GO terms passed the cut-off.\n")
+}
+```
+
 
 # 7. Minimal-panel classifier (LASSO)
 
